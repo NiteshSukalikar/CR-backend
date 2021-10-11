@@ -1,5 +1,6 @@
 
 
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NotificationService.Common.StaticConstants;
+using NotificationService.Hubs;
 using NotificationService.Infrastructure.DataAccess;
 using NotificationService.Repository.Implementations;
 using NotificationService.Repository.Interfaces;
@@ -56,6 +58,7 @@ namespace NotificationService
                 options.AllowSynchronousIO = true;
             });
 
+        
             services.AddScoped<ICallService, CallService>();
             services.AddScoped<ICallRepository, CallRepository>();
             services.AddTransient<INotificationService, NotificationServiceClass>();
@@ -63,6 +66,14 @@ namespace NotificationService
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<HttpClient, HttpClient>();
+
+
+            services.AddSignalR();
+            services.AddCors(confg =>
+              confg.AddPolicy("AllowAll",
+                  p => p.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()));
 
         }
 
@@ -77,14 +88,16 @@ namespace NotificationService
             }
 
             app.UseHttpsRedirection();
-
+          
             app.UseRouting();
-
+           
+            app.UseCors("CorsPolicy");
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<CallHub>("/callhub");
             });
         }
 

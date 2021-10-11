@@ -107,3 +107,12 @@ dist
 # TernJS port file
 .tern-port
 Gateway/bin/Debug/net5.0/Gateway.dll
+.vs/CR-backend/v16/.suo
+.vs/slnx.sqlite
+*.config
+*.sqlite
+*.v2
+*.sqlite
+.vs/SugeryLink/v16/.suo
+*.json
+.vs/slnx.sqlite

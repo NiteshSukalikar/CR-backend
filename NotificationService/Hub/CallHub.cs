@@ -5,7 +5,7 @@ using NotificationService.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace IEH_Schedular.Hubs
+namespace NotificationService.Hubs
 {
     public class CallHub : Hub
     {
@@ -82,18 +82,12 @@ namespace IEH_Schedular.Hubs
             }
         }
         public void SendNotification(SendNotificationModel notifications)
-        {
-            //var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+        {            
             try
             {
-               // CallDetails callDetails = _callService.GetCallUserDetails(AptId, UserId);
-
-
-               
                 if (notifications != null)
                 {
-                    var data = _notificationService.SaveNotification(notifications);
-
+                    //var data = _notificationService.SaveNotification(notifications);
                     CallNotificationModel connection;
                     long userId = Convert.ToInt64(notifications.UserID);//callDetails.PatUserId;//Convert.ToInt32(_context.Patients.Where(b => b.Id == AppDetails.PatientID).Select(b => b.UserID).FirstOrDefault());
                     connection = _callService.GetCallConnectionId((int)userId);
@@ -102,21 +96,8 @@ namespace IEH_Schedular.Hubs
                     pagination.pageIndex = 1;
                     pagination.pageSize = 10;
                     pagination.searchText = "";
-                    var response = _notificationService.GetNotifications(pagination, userId);
-                    
-                   // if (data.Data == "201")//If provider/staff logged in applcation,notification will send to patient userid
-                    {
-                       
-                        if (connection != null)
-                        {
-                            var devicetoken = "d4cOnrkw8ERPoziwreXPSP:APA91bFhuchsrAnQjx5hrFxXGZy1jNsr4bU5LI3mKjs06nY-UJ1f4C_hSsmXCtwh5VKWvJYtHCYX_XZZo-1dNR8uj5QZc7plIlhZY9VUI1fukrFFPFS7HvGflZTjqmXPrYJTIjy6vqqV";
-
-
-                            var resp = _notificationService.SendPushNotification(devicetoken,    notifications.NotificationTitle,  0,  notifications.Description,  1,  false,  notifications);
-                            Clients.Client(connection.ConnectionId).SendAsync("GetNotification", response.Data);
-                        }
-                    }
-                   
+                    //var response = _notificationService.GetNotifications(pagination, userId);
+                    Clients.Client(connection.ConnectionId).SendAsync("askServerResponse", notifications.Description);                  
 
                 }
             }
