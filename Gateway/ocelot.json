@@ -1,16 +1,16 @@
 {
   "ReRoutes": [
     {
-      "DownstreamPathTemplate": "/api/user",
+      "DownstreamPathTemplate": "/api/user/GetPatientByMob",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44374
+          "Port": 44307
         }
       ],
-      "UpstreamPathTemplate": "/api/user",
-      "UpstreamHttpMethod": [ "GET","POST" ]
+      "UpstreamPathTemplate": "/api/user/GetPatientByMob",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
     }
   ],
   "GlobalConfiguration": {

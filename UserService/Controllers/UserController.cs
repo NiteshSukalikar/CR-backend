@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Shared.Helper;
+using Shared.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
-using UserService.Database;
-using UserService.Database.Entities;
+using UserService.Services.Interfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,53 +19,37 @@ namespace UserService.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        DatabaseContext db;
-        public UserController()
+        private readonly IConfiguration _configuration;
+        private CommonMethods _commonMethods;
+        private readonly IUsersService _usersService;
+
+        public HttpClient Client { get; }
+
+        public UserController(IUsersService usersService, HttpClient client, IConfiguration Configuration)
         {
-            db = new DatabaseContext();
+            _usersService = usersService;
+            Client = client;
+            _configuration = Configuration;
+            _commonMethods = new CommonMethods();
+
         }
-        // GET: api/<UserController>
+
+        [NonAction]
+        public TokenClaimsModal GetUserByClaim()
+        {
+            HttpContext httpContext = HttpContext.Request.HttpContext;
+            var claims = _commonMethods.GetUserClaimsFromToken(httpContext);
+            return claims;
+        }
+
+        [AllowAnonymous]
         [HttpGet]
-        public IEnumerable<User> Get()
+        [Route("GetPatientByMob")]
+        public async Task<IActionResult> GetPatientByMob()
         {
-            return db.Users.ToList();
-        }
-
-        // GET api/<UserController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<UserController>
-        [HttpPost]
-        public IActionResult Post([FromBody] User model)
-        {
-            try
-            {
-                db.Users.Add(model);
-                db.SaveChanges();
-
-                return StatusCode(StatusCodes.Status201Created, model);
-            }
-            catch (Exception ex)
-            {
-
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        // PUT api/<UserController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<UserController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            string phone = "12316556";
+            ResponseModel result = await _usersService.GetPatientByMob(phone);
+            return Ok(result);
         }
     }
 }

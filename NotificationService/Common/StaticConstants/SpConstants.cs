@@ -12,5 +12,6 @@
         public const string GetCallUserDetails = "VID_GetCallUserDetails";
         public const string SaveUpdateCallUser = "VID_SaveUpdateCallUser";
         public const string SaveNotification = "USP_SaveNotifications";
+        public const string USP_GetNotifications = "USP_GetNotifications";
     }
 }
