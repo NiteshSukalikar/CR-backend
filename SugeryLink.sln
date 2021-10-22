@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotificationService", "NotificationService\NotificationService.csproj", "{4D2948F4-FDF5-4F75-994B-9F83A7DB047F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DashboardService", "DashboardService\DashboardService.csproj", "{1B8C5E94-923A-429F-8E1A-0B63C2034C8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DashboardService", "DashboardService\DashboardService.csproj", "{1B8C5E94-923A-429F-8E1A-0B63C2034C8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService", "AuthService\AuthService.csproj", "{B9E701F2-1CA5-4B3A-943A-67623DED48E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{1B8C5E94-923A-429F-8E1A-0B63C2034C8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B8C5E94-923A-429F-8E1A-0B63C2034C8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B8C5E94-923A-429F-8E1A-0B63C2034C8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9E701F2-1CA5-4B3A-943A-67623DED48E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9E701F2-1CA5-4B3A-943A-67623DED48E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9E701F2-1CA5-4B3A-943A-67623DED48E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9E701F2-1CA5-4B3A-943A-67623DED48E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

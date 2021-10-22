@@ -10,6 +10,7 @@ namespace Shared.Enum
         StatusCode203 = 203,
         StatusCode204 = 204,
         StatusCode205 = 205,
+        StatusCode206 = 206,
 
         StatusCode301 = 301,
         StatusCode302 = 302,
