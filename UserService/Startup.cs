@@ -7,11 +7,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Shared.StaticConstants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using UserService.Common.StaticConstants;
 using UserService.Infrastructure.DataAccess;
@@ -36,6 +38,33 @@ namespace UserService
         public void ConfigureServices(IServiceCollection services)
         {
             ReadConfigSettings();
+
+            //var audienceConfig = Configuration.GetSection("Audience");
+
+            var mySecret = "Y2F0Y2hlciUyMHdvbmclMjBsb3ZlJTIwLm5ldA==";
+            var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = mySecurityKey,
+                ValidateIssuer = true,
+                ValidIssuer = "http://www.c-sharpcorner.com/members/catcher-wong",
+                ValidateAudience = true,
+                ValidAudience = "Catcher Wong",
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
+                RequireExpirationTime = true,
+            };
+
+            services.AddAuthentication(o =>
+            {
+                o.DefaultAuthenticateScheme = "TestKey";
+            })
+            .AddJwtBearer("TestKey", x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.TokenValidationParameters = tokenValidationParameters;
+            });
 
             services.AddSingleton(Configuration);
             services.AddDbContext<IEHDbContext>(options => options.UseSqlServer(Constants.DbConn));
@@ -65,7 +94,9 @@ namespace UserService
 
             app.UseRouting();
             app.UseCors("AllowAll");
+            app.UseAuthentication();
             app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {

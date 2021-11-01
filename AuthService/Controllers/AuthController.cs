@@ -12,6 +12,10 @@ using Shared.Helper;
 using AuthService.Utility;
 using AuthService.Common.ResponseVM;
 using AuthService.Common.StaticConstants;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace IEH_Auth.Controllers
 {
@@ -49,6 +53,9 @@ namespace IEH_Auth.Controllers
         /// </summary>
         /// <param name="tokenModal"></param>
         /// <returns></returns>
+        /// 
+
+
         [HttpPost]
         [Route("RenewTokens")]
         public async Task<IActionResult> RenewTokens([FromBody] UserDataModel userData)
@@ -104,6 +111,7 @@ namespace IEH_Auth.Controllers
         }
 
         [HttpPost]
+        // [Authorize]
         [Route("LoginOTPVerification")]
         public async Task<IActionResult> LoginOTPVerification([FromBody] OTPModel model)
         {
@@ -169,12 +177,12 @@ namespace IEH_Auth.Controllers
 
         [HttpPost]
         [Route("logout")]
-        public async Task<IActionResult> logout([FromBody]int userId)
+        public async Task<IActionResult> logout([FromBody] int userId)
         {
             HttpContext context = HttpContext.Request.HttpContext;
             var isMobile = _commonMethods.checkForMobileCall(context);
             ResponseVM result = await _authService.updateDeviceToken(isMobile, userId);
-          //  await context.SignOutAsync();
+            //  await context.SignOutAsync();
             return Ok(result);
         }
 
@@ -187,6 +195,6 @@ namespace IEH_Auth.Controllers
             geoData.Country = httpContext.Request.Headers["Country"];
             return geoData;
         }
-        
+
     }
 }

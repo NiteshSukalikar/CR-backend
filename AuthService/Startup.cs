@@ -5,6 +5,7 @@ using AuthService.Repository.Interfaces;
 using AuthService.Repository.UnitOfWorkAndBaseRepo;
 using AuthService.Services.Implementations;
 using AuthService.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shared.StaticConstants;
 using System;
@@ -40,6 +42,9 @@ namespace AuthService
             ReadConfigSettings();
 
             services.AddControllers();
+
+            services.AddOptions();
+            services.Configure<Model.Audience>(Configuration.GetSection("Audience"));
 
             services.AddTransient<IAuthService, AuthServices>();
             services.AddTransient<IAuthRepository, AuthRepository>();

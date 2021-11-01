@@ -27,7 +27,7 @@
 
         List<RolePermissionsModel> GetRolePermissions(int roleId);
         string loginLog(LoginLogs model);
-
-
+        string OrganizationsToken(OrganizationsToken model);
+        string SaveLogUserSystem(SaveLogUserSystem model);
     }
 }

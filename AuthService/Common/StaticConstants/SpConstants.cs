@@ -26,7 +26,7 @@
         /// Defines the GetUserByEmail
         /// </summary>
         public const string GetUserByEmail = "USP_GetUserByEmail";
-        // public const string GEtUserByEmail = "USP_GetUserByEmailAddress";
+        public const string SaveLogUserSystem = "USP_SaveLogUserSystem";
 
 
         /// <summary>
@@ -34,6 +34,8 @@
         /// </summary>
         public const string UpdateDeviceTokenByUserId = "USP_UpdateDeviceTokenByUserId";
         public const string addLoginLogs = "USP_addLoginLogs";
+        public const string addOrganizationsToken = "USP_addOrganizationsToken";
+        public const string getLoginDetail = "USP_getLoginDetail";
 
         /// <summary>
         /// Defines the GetUserByEmailAndRoleId
@@ -49,5 +51,6 @@
         public const string AuditApiLog = "USP_AuditApiLog";
 
         public const string CreatePassword = "USP_ForgotNewPassword";
+
     }
 }

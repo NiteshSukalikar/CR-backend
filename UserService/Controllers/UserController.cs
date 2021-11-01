@@ -42,7 +42,7 @@ namespace UserService.Controllers
             return claims;
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpGet]
         [Route("GetPatientByMob")]
         public async Task<IActionResult> GetPatientByMob()
@@ -50,6 +50,13 @@ namespace UserService.Controllers
             string phone = "12316556";
             ResponseModel result = await _usersService.GetPatientByMob(phone);
             return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public string Get(int id)
+        {
+            string name = "nitesh";
+            return name;
         }
     }
 }

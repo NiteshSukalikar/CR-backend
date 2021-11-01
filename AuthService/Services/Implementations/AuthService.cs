@@ -128,11 +128,11 @@
                 // user = await _unitOfWork.User.GetUserDetailsByEmailAndRoleId(loginVM.Email, loginVM.RoleId);
 
                 // Database
-                //user = await _unitOfWork.User.GetUserDetailsForLogin(loginVM);
+                user = await _unitOfWork.User.GetUserDetailsForLogin(loginVM);
 
-                user.Password = "hLhLbZFF52WHGESayQxLZA==";
-                user.ContactNumber = "789456123";
-                user.EmailAddress = "admin5@yopmail.com";
+                //user.Password = "hLhLbZFF52WHGESayQxLZA==";
+                //user.ContactNumber = "789456123";
+                //user.EmailAddress = "admin5@yopmail.com";
 
 
                 // Key and Iv Values
@@ -455,6 +455,8 @@
                 return responseVM;
             }
         }
+        
+
         public async Task<ResponseVM> LoginOTPVerification(OTPModel model)
         {
             var responseVM = new ResponseVM()
@@ -466,22 +468,11 @@
             try
             {
                 var user = new UserDetails();
-                //user = await _unitOfWork.User.GetUserDetailsById(model.UserId);
-
-                // Database
-                //user = await _unitOfWork.User.GetUserDetailsForLogin(loginVM);
-
-
-                user.ContactNumber = "789456123";
-                user.EmailAddress = "admin5@yopmail.com";
-
+                user = await _unitOfWork.User.GetUserDetailsById(model.UserId);
 
                 // Key and Iv Values
                 var keybytes = Encoding.UTF8.GetBytes(Constants.keybytes);
                 var iv = Encoding.UTF8.GetBytes(Constants.iv);
-
-                //var decryptedNUmber = DecryptRijndael(user.ContactNumber, keybytes, iv);
-                //var decrypetEmail = DecryptRijndael(user.EmailAddress, keybytes, iv);
 
                 if (user != null && user.ContactNumber != null)
                 {
@@ -500,13 +491,60 @@
                                 otpValid = false;
                             }
                         }
-
                     }
                     if (otpValid)
                     {
 
                         // After Identity -->
                         //JsonModel obj = await IdentityLogin(user);
+                        var mySecret = "asdv234234^&%&^%&^hjsdfb2%%%";
+                        var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
+
+                        var myIssuer = "http://mysite.com";
+                        var myAudience = "http://myaudience.com";
+                        var now = DateTime.UtcNow;
+                        var claims = new Claim[]
+                        {
+                            new Claim("UserID", user.UserId.ToString()),
+                            new Claim("EmailAddress", user.EmailAddress),
+                        };                       
+                        var tokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = mySecurityKey,
+                            ValidateIssuer = true,
+                            ValidIssuer = myIssuer,
+                            ValidateAudience = true,
+                            ValidAudience = myAudience,
+                            ValidateLifetime = true,
+                            ClockSkew = TimeSpan.Zero,
+                            RequireExpirationTime = true,
+
+                        };
+
+                        var jwt = new JwtSecurityToken(
+                            issuer: myIssuer,
+                            audience: myAudience,
+                            claims: claims,
+                            notBefore: now,
+                            expires: DateTime.UtcNow.AddDays(7),
+                            signingCredentials: new SigningCredentials(mySecurityKey, SecurityAlgorithms.HmacSha256)
+                        );
+                        var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+                        var responseJson = new
+                        {
+                            access_token = encodedJwt,
+                            expires_in = DateTime.UtcNow.AddDays(7),
+                            claims = user
+                        };
+
+                        //if (responseJson != null)
+                        //{
+                        //    SaveLogUserSystem saveLogUserSystem = new SaveLogUserSystem();
+                        //    saveLogUserSystem.SystemIPAddress = model.ipAddr;
+                        //    saveLogUserSystem.OrganizationsToken = responseJson.access_token;
+                        //    var res =  _unitOfWork.User.SaveLogUserSystem(saveLogUserSystem);
+                        //}
 
                         //if (obj.StatusCode.ToString() == ((int)StatusCode.StatusCode200).ToString())
                         //{
@@ -519,7 +557,7 @@
                         //    var res = await _unitOfWork.User.UpdateDeviceTokenByUserId(model.DeviceToken, model.UserId);
                         //}
                         responseVM.Code = "200";
-                        responseVM.Data = "Sucess";
+                        responseVM.Data = responseJson;
                         responseVM.Message = "Sucessfully Login";
                     }
                     else
@@ -557,6 +595,42 @@
                 loginLogs.OrganizationID = model.OrganizationId;
                 loginLogs.LoginAttempt = model.LoginAttempt;
                 log = _unitOfWork.User.loginLog(loginLogs);
+                return log;
+            }
+            catch (Exception e)
+            {
+                return log;
+            }
+        }
+
+        public async Task<string> OrganizationsToken(OrganizationsToken model)
+        {
+            string log = "205";
+            try
+            {
+                OrganizationsToken organizationsToken = new OrganizationsToken();
+                organizationsToken.OrganizationDecryptString = model.OrganizationDecryptString;
+                organizationsToken.OrganizationEncryptString = model.OrganizationEncryptString;
+                organizationsToken.TokenType = model.TokenType;
+                organizationsToken.TokenDescription = model.TokenDescription;
+                log = _unitOfWork.User.OrganizationsToken(organizationsToken);
+                return log;
+            }
+            catch (Exception e)
+            {
+                return log;
+            }
+        }
+
+        public async Task<string> SaveLogUserSystem(SaveLogUserSystem model)
+        {
+            string log = "205";
+            try
+            {
+                SaveLogUserSystem saveLogUserSystem = new SaveLogUserSystem();
+                saveLogUserSystem.SystemIPAddress = model.SystemIPAddress;
+                saveLogUserSystem.OrganizationsToken = model.OrganizationsToken;
+                log = _unitOfWork.User.SaveLogUserSystem(saveLogUserSystem);
                 return log;
             }
             catch (Exception e)

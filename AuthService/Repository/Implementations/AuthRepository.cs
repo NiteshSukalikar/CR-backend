@@ -464,5 +464,67 @@
                 connection.Close();
             }
         }
+
+        public string OrganizationsToken(OrganizationsToken model)
+        {
+            var outParam = new SqlParameter("@ReturnCode", SqlDbType.NVarChar, 20)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            SqlParameter[] param = {
+                new SqlParameter("@OrganizationEncryptString", model.OrganizationEncryptString),
+                new SqlParameter("@OrganizationDecryptString", model.OrganizationDecryptString),
+                new SqlParameter("@TokenType", model.TokenType),
+                new SqlParameter("@TokenDescription", model.TokenDescription),
+                outParam
+            };
+            var connection = _IEHDbContext.GetDbConnection();
+            try
+            {
+                SqlHelper.ExecuteProcedureReturnString(Constants.DbConn, SpConstants.addLoginLogs, param);
+                return (string)outParam.Value;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public string SaveLogUserSystem(SaveLogUserSystem model)
+        {
+            var LogUserCreatedOn = DateTime.Now.ToString("MM/dd/yyyy");
+            var outParam = new SqlParameter("@ReturnCode", SqlDbType.NVarChar, 20)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            SqlParameter[] param = {
+                new SqlParameter("@SystemIPAddress", model.SystemIPAddress),
+                new SqlParameter("@OrganizationsToken", model.OrganizationsToken),
+                new SqlParameter("@LogUserCreatedOn", LogUserCreatedOn),
+                outParam
+            };
+            var connection = _IEHDbContext.GetDbConnection();
+            try
+            {
+                SqlHelper.ExecuteProcedureReturnString(Constants.DbConn, SpConstants.addLoginLogs, param);
+                return (string)outParam.Value;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            finally
+            {
+                connection.Close();
+            }
+        }
     }
 }
