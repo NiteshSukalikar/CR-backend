@@ -77,39 +77,7 @@ namespace IEH_Auth.Controllers
             result = await _authService.Login(loginVM);
             return Ok(result);
         }
-
-        [HttpPost]
-        [Route("ActivateUser")]
-        public async Task<IActionResult> ActivateUser([FromBody] ActivationModel activationModel)
-        {
-            ResponseVM result = await _authService.ActivateUser(activationModel);
-            return Ok(result);
-        }
-
-        [HttpGet]
-        [Route("sendOTPToUser")]
-        public async Task<IActionResult> sendOTPToUser()
-        {
-            var user = new UserModel();
-            try
-            {
-                var respOTP = await _authService.StartVerificationAsync("+919981538167", "sms", "email");
-                var responseVM = new ResponseVM
-                {
-                    Code = "200",
-                    Data = respOTP,
-                    Message = IEHMessages.OperationSuccessful
-                };
-                return Ok(responseVM);
-
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-                return BadRequest(ex.Message);
-            }
-        }
-
+       
         [HttpPost]
         // [Authorize]
         [Route("LoginOTPVerification")]
@@ -123,22 +91,22 @@ namespace IEH_Auth.Controllers
             return Ok(result);
         }
 
-        //[HttpGet]
-        //[AllowAnonymous]
+        
         [HttpPost]
-        [Route("GetRolePermissiononRefresh")]
-        public async Task<IActionResult> GetRolePermissiononRefresh([FromBody] int roleId)
-        {
-            ResponseVM result = await _authService.GetRolePermissiononRefresh(roleId);
-            return Ok(result);
-        }
-
-        [HttpPost]
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [Route("forgotPassword")]
         public async Task<IActionResult> forgotPassword([FromBody] ForgotPassword forgotPassword)
         {
             ResponseVM result = await _authService.forgotPassword(forgotPassword);
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("forgotPasswordExpired")]
+        public async Task<IActionResult> forgotPasswordExpired([FromBody] ForgotPassword forgotPassword)
+        {
+            ResponseVM result = await _authService.forgotPasswordExpired(forgotPassword);
             return Ok(result);
         }
 

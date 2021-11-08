@@ -1,6 +1,7 @@
 ﻿namespace AuthService.Repository.Interfaces
 {
     using AuthService.Model;
+    using AuthService.Utility;
     using IEH_Shared.Model;
     using Shared.Model;
     using System.Collections.Generic;
@@ -24,10 +25,11 @@
         string resetPasswordForgot(ResetPassword resetPassword);
         string ChangePassword(ChangePassword password, TokenClaimsModal claims);
         Task<UserDetails> GetUserDetailsbyMRN(string mrn);
-
         List<RolePermissionsModel> GetRolePermissions(int roleId);
         string loginLog(LoginLogs model);
         string OrganizationsToken(OrganizationsToken model);
         string SaveLogUserSystem(SaveLogUserSystem model);
+        string SavePasswordToken(PasswordToken model);
+        string PasswordTokenExpired(PasswordToken model);
     }
 }

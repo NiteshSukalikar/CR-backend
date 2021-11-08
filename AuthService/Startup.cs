@@ -5,6 +5,7 @@ using AuthService.Repository.Interfaces;
 using AuthService.Repository.UnitOfWorkAndBaseRepo;
 using AuthService.Services.Implementations;
 using AuthService.Services.Interfaces;
+using IEH_Shared.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shared.Model;
 using Shared.StaticConstants;
 using System;
 using System.Collections.Generic;
@@ -50,6 +52,8 @@ namespace AuthService
             services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IEmailService, EmailService>();
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddTransient<HttpClient, HttpClient>();
 
 

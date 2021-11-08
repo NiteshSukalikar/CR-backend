@@ -36,6 +36,8 @@
         public const string addLoginLogs = "USP_addLoginLogs";
         public const string addOrganizationsToken = "USP_addOrganizationsToken";
         public const string getLoginDetail = "USP_getLoginDetail";
+        public const string addPasswordToken = "USP_addPasswordToken";
+        public const string PasswordTokenExpired = "USP_PasswordTokenExpired";
 
         /// <summary>
         /// Defines the GetUserByEmailAndRoleId

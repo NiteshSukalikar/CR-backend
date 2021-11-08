@@ -16,21 +16,23 @@
     using NLog.Common;
     using Twilio.Rest.Verify.V2.Service;
     using Twilio.Exceptions;
-    using global::AuthService.Services.Interfaces;
-    using global::AuthService.Model.Auth;
     using Shared.Helper;
-    using global::AuthService.Model;
-    using global::AuthService.Common.ResponseVM;
     using Shared.Enum;
-    using global::AuthService.Common.StaticConstants;
     using Shared.StaticConstants;
     using IdentityModel.Client;
     using RestSharp;
     using Newtonsoft.Json;
-    using global::AuthService.Repository.UnitOfWorkAndBaseRepo;
-    using global::AuthService.Utility;
     using System.Net.Mail;
     using System.Net;
+    using IEH_Shared.Utility;
+    using System.Linq;
+    using AuthService.Services.Interfaces;
+    using AuthService.Repository.UnitOfWorkAndBaseRepo;
+    using AuthService.Model.Auth;
+    using AuthService.Common.StaticConstants;
+    using AuthService.Model;
+    using AuthService.Common.ResponseVM;
+    using AuthService.Utility;
 
     /// <summary>
     /// Defines the <see cref="AuthService" />
@@ -66,6 +68,7 @@
         /// Defines commonMethods
         /// </summary>
         private CommonMethods _commonMethods;
+        private readonly IEmailService _emailSender;
 
 
         /// <summary>
@@ -79,12 +82,13 @@
         /// <param name="unitOfWork">The unitOfWork<see cref="IUnitOfWork"/></param>
         /// <param name="client">The unitOfWork<see cref="HttpClient"/></param>
         /// <param name="Configuration">The Configuration<see cref="IConfiguration"/></param>
-        public AuthServices(IUnitOfWork unitOfWork, HttpClient client, IConfiguration Configuration)
+        public AuthServices(IUnitOfWork unitOfWork, HttpClient client, IConfiguration Configuration, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _httpClient = client;
             _configuration = Configuration;
             _commonMethods = new CommonMethods();
+            _emailSender = emailService;
             TwilioClient.Init(Constants.AccountSid, Constants.AuthToken);
         }
 
@@ -185,7 +189,7 @@
                         //var decryptedNUmber = DecryptRijndael(user.ContactNumber, keybytes, iv);
                         //var decrypetEmail = DecryptRijndael(user.EmailAddress, keybytes, iv);
 
-                        var respOTP = await StartVerificationAsync(user.ContactNumber, loginVM.otpVia, user.EmailAddress);
+                        var respOTP = await StartVerificationAsync(user.ContactNumber, loginVM.otpVia, user.EmailAddress, null);
                         if (loginVM.otpVia != "email")
                         {
                             responseData = JsonConvert.DeserializeObject<ResponseVM>(respOTP.Response);
@@ -215,64 +219,6 @@
                 responseVM.Message = IEHMessages.InternalServerError;
                 return responseVM;
             }
-        }
-        public async Task<ResponseVM> ActivateUser(ActivationModel activationModel)
-        {
-            var responseVM = new ResponseVM();
-            try
-            {
-                var data = await _unitOfWork.User.GetUserDetailsbyMRN(activationModel.mrn);
-                var keybytes = Encoding.UTF8.GetBytes(Constants.keybytes);
-                var iv = Encoding.UTF8.GetBytes(Constants.iv);
-                if (data != null && data.ActivationCode == activationModel.activationCode
-                    //&& data.SSN != 0 ? data.SSN.ToString().Substring(9 - 4) == activationModel.ssn.ToString() : true
-                    //&& data.Dob.ToShortDateString() == activationModel.dob.ToShortDateString())
-                    && data.DobEncrypted == activationModel.dob)
-                {
-                    data.isActivated = true;
-                    var _otpSent = false;
-                    var update = _unitOfWork.User.ActivateUser(data);
-
-                    if (update == "201")
-                    {
-
-                        var decryptedNUmber = DecryptRijndael(data.ContactNumber, keybytes, iv);
-                        var decrypetEmail = DecryptRijndael(data.EmailAddress, keybytes, iv);
-
-                        var respOTP = await StartVerificationAsync(decryptedNUmber, "sms", decrypetEmail);
-                        _otpSent = respOTP.IsValid;
-
-                        responseVM.Code = ((int)StatusCode.StatusCode200).ToString();
-                        responseVM.Data = new { userId = data.UserId };
-                        responseVM.Message = IEHMessages.ActivatedSucces;
-                        return responseVM;
-                    }
-                    else
-                    {
-                        responseVM.Code = ((int)StatusCode.StatusCode500).ToString();
-                        responseVM.Data = new { userId = data.UserId, otpSent = _otpSent };
-                        responseVM.Message = IEHMessages.ActivatedFailure;
-                        return responseVM;
-                    }
-                }
-                else
-                {
-                    responseVM.Code = ((int)StatusCode.StatusCode400).ToString();
-                    responseVM.Data = null;
-                    responseVM.Message = IEHMessages.ActivatedFailure;
-                    return responseVM;
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-                responseVM.Code = ((int)StatusCode.StatusCode301).ToString();
-                responseVM.Data = null;
-                responseVM.Message = IEHMessages.ActivatedFailure;
-                return responseVM;
-            }
-
         }
         public async Task<ResponseVM> updateDeviceToken(bool isMobile, int userId)
         {
@@ -344,7 +290,6 @@
                 return responseVM;
             }
         }
-
         public async Task<ResponseVM> ChangePassword(ChangePassword password, Shared.Model.TokenClaimsModal claims)
         {
             var responseVM = new ResponseVM();
@@ -455,7 +400,7 @@
                 return responseVM;
             }
         }
-        
+
 
         public async Task<ResponseVM> LoginOTPVerification(OTPModel model)
         {
@@ -484,7 +429,7 @@
                         {
                             if (respOTP.Sid == "200")
                             {
-                             otpValid = respOTP.IsValid;
+                                otpValid = respOTP.IsValid;
                             }
                             else
                             {
@@ -507,7 +452,7 @@
                         {
                             new Claim("UserID", user.UserId.ToString()),
                             new Claim("EmailAddress", user.EmailAddress),
-                        };                       
+                        };
                         var tokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuerSigningKey = true,
@@ -835,217 +780,7 @@
             }
         }
 
-        public async Task<JsonModel> IdentityLogin(UserDetails logiModel)
-        {
-            try
-            {
-                var client = new HttpClient();
-                var disco = new DiscoveryDocumentResponse();
-                try
-                {
-                    disco = await client.GetDiscoveryDocumentAsync(SharedConstants.IdentityURL);
-                }
-                catch (Exception ex)
-                {
-                    var _res = new JsonModel()
-                    {
-                        data = new object(),
-                        Message = ex.Message,
-                        StatusCode = (int)StatusCode.StatusCode500
-                    };
-                    return _res;
-                }
-                //var disco = await client.GetDiscoveryDocumentAsync(SharedConstants.IdentityURL);
-                UserDataModel tokenModal = new UserDataModel();
-                List<RolePermissionsModel> MainrolePermissionsModel = new List<RolePermissionsModel>();
-                List<RolePermissionsModel> rolePermissionsModel = new List<RolePermissionsModel>();
-
-                var res = new JsonModel();
-                var response = new TokenResponse();
-                try
-                {
-                    response = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
-                    {
-                        Address = SharedConstants.IdentityURL + "/connect/token",
-                        ClientId = SharedConstants.ClientId,
-                        ClientSecret = SharedConstants.ClientSecret,
-                        Scope = SharedConstants.Scope,
-                        UserName = logiModel.EmailAddress,
-                        Password = logiModel.Password
-                    });
-                }
-                catch (Exception ex)
-                {
-                    var _res = new JsonModel()
-                    {
-                        data = new object(),
-                        Message = ex.Message,
-                        StatusCode = 600
-                    };
-                    return _res;
-                }
-
-                tokenModal.refreshToken = response.RefreshToken;
-                tokenModal.AccessToken = response.AccessToken;
-
-                if (tokenModal.AccessToken != null && tokenModal.refreshToken != null)
-                {
-                    var resp = new UserInfoResponse();
-                    try
-                    {
-                        resp = await client.GetUserInfoAsync(new UserInfoRequest
-                        {
-                            Address = disco.UserInfoEndpoint,
-                            Token = tokenModal.AccessToken,
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        var _res = new JsonModel()
-                        {
-                            data = new object(),
-                            Message = ex.Message,
-                            StatusCode = 700
-                        };
-                        return _res;
-                    }
-                    tokenModal.Claims = resp.Json;
-
-                    var _resp = "";
-                    try
-                    {
-                        tokenModal.auth_token = GenerateTokenString(tokenModal);
-                        _resp = tokenModal.auth_token;
-                    }
-                    catch (Exception ex)
-                    {
-                        var _res = new JsonModel()
-                        {
-                            data = tokenModal,
-                            Message = _resp,
-                            StatusCode = 1000
-                        };
-                        return _res;
-                    }
-
-                    //tokenModal.rolePermissions  = _unitOfWork.User.GetRolePermissions(Convert.ToInt32(logiModel.RoleId));
-                    //rolePermissionsModel = tokenModal.rolePermissions;
-
-                    //tokenModal.rolePermissions.ForEach(item =>
-                    //{
-                    //    tokenModal.rolePermissions.ForEach(items =>
-                    //    {
-                    //        if (items.ParentModuleId == item.ModuleId)
-                    //        {
-                    //            item.subModules = item.subModules !=null ? item.subModules : new List<RolePermissionsModel>();
-                    //            item.subModules.Add(items);
-                    //         //   tokenModal.rolePermissions.Remove(item);
-
-                    //        }
-                    //    });
-                    //});
-
-
-
-
-                    res = new JsonModel()
-                    {
-                        data = tokenModal,
-                        Message = response.HttpResponse.ReasonPhrase,
-                        StatusCode = (int)StatusCode.StatusCode200
-                    };
-                }
-                else
-                {
-                    res = new JsonModel()
-                    {
-                        data = tokenModal,
-                        Message = response.ErrorDescription,
-                        StatusCode = 800
-                    };
-                }
-                return res;
-            }
-            catch (Exception ex)
-            {
-                var res = new JsonModel()
-                {
-                    data = ex,
-                    Message = ex.Message,
-                    StatusCode = (int)StatusCode.StatusCode400
-                };
-                return res;
-            }
-        }
-        public async Task<ResponseVM> GetRolePermissiononRefresh(int RoleID)
-        {
-            ResponseVM response = new ResponseVM();
-
-            try
-            {
-                List<RolePermissionsModel> rolePermissions = new List<RolePermissionsModel>();
-                rolePermissions = _unitOfWork.User.GetRolePermissions(Convert.ToInt32(RoleID));
-
-                rolePermissions.ForEach(item =>
-                {
-                    rolePermissions.ForEach(items =>
-                    {
-                        if (items.ParentModuleId == item.ModuleId)
-                        {
-                            item.subModules = item.subModules != null ? item.subModules : new List<RolePermissionsModel>();
-                            item.subModules.Add(items);
-                            //   tokenModal.rolePermissions.Remove(item);
-
-                        }
-                    });
-                });
-                //rolePermissions.ForEach(item =>
-                //{
-                //    if (item.subModules != null)
-                //    {
-                //        item.subModules.ForEach(subModule =>
-                //        {
-                //            rolePermissions.ForEach(items =>
-                //            {
-                //                if (items.ParentModuleId == subModule.ModuleId)
-                //                {
-                //                    subModule.subModules = subModule.subModules != null ? subModule.subModules : new List<RolePermissionsModel>();
-                //                    subModule.subModules.Add(items);
-                //                    //   tokenModal.rolePermissions.Remove(item);
-
-                //                }
-                //            });
-                //        });
-                //    }
-                //});
-                if (rolePermissions.Count > 0)
-                {
-                    rolePermissions.ForEach(s => s.iconPath = Constants.ImagePath + s.iconPath);
-                    response.Data = rolePermissions;
-                    response.Message = IEHMessages.Success;
-                    response.Code = ((int)StatusCode.StatusCode200).ToString();
-                }
-                else
-                {
-                    response.Data = rolePermissions;
-                    response.Message = IEHMessages.RecordNotFound;
-                    response.Code = ((int)StatusCode.StatusCode200).ToString();
-
-                }
-                return response;
-
-            }
-            catch (Exception e)
-            {
-
-                response.Data = null;
-                response.Message = IEHMessages.RecordNotFound;
-                response.Code = ((int)StatusCode.StatusCode500).ToString();
-                return response;
-            }
-        }
-
-        public async Task<VerificationResult> StartVerificationAsync(string phoneNumber, string channel, string email)
+        public async Task<VerificationResult> StartVerificationAsync(string phoneNumber, string channel, string email, string? forgotPasswordUrl)
         {
             try
             {
@@ -1063,7 +798,17 @@
                 string mailFrom = "nitesh12345@zohomail.in";
                 string mailTo = email;
                 string mailTitle = "Authentication Code";
-                string mailMessage = "Your Otp is 123456";
+                string mailMessage;
+                if (forgotPasswordUrl != null)
+                {
+                    var htmlEmailContent = "<br/><br/><h1>CR-Link</h1><br/><br/><br/><a href='https://ehr.innovastra.com/login'>https://ehr.innovastra.com/login</a><br/><br/><h3>Sincerely,</h3><span><strong>The CR-link Team</strong></span><br/><br/><br/><h3>CR Link</h3>";
+                    await _emailSender.sendEmail(email, "Password Reset Email", htmlEmailContent);
+                    return new VerificationResult("200", null);
+                }
+                else
+                {
+                    mailMessage = "Your Otp is 123456";
+                }
 
                 using (SmtpClient client = new SmtpClient())
                 {
@@ -1123,44 +868,27 @@
             {
                 var otpsend = false;
                 var responseData = new TermiiResponseModel();
-                Task<UserDetails> data = _unitOfWork.User.GetUserDetailsByEmail(forgotPassword.Email);
+                var token = new PasswordToken();
+                var user = new UserDetails();
+                user = await _unitOfWork.User.GetUserDetailsByEmail(forgotPassword.Email);
 
                 UserDetails userDetails = new UserDetails();
-                userDetails = data.Result;
-                var keybytes = Encoding.UTF8.GetBytes(Constants.keybytes);
-                var iv = Encoding.UTF8.GetBytes(Constants.iv);
-
                 if (userDetails != null)
                 {
-                    if (userDetails.UserType != forgotPassword.RoleId)
-                    {
-                        response.Data = new { otpSend = otpsend };
-                        response.Message = IEHMessages.EmailRoleNotMatched;
-                        response.Code = ((int)StatusCode.StatusCode204).ToString();
-                        return response;
-                    }
-
-                    var decryptedNumber = DecryptRijndael(userDetails.ContactNumber, keybytes, iv);
-                    var decryptedEmail = DecryptRijndael(userDetails.EmailAddress, keybytes, iv);
-                    var respOTP = await StartVerificationAsync(decryptedNumber, forgotPassword.otpVia, decryptedEmail);
-                    if (forgotPassword.otpVia != "email")
-                    {
-                        responseData = JsonConvert.DeserializeObject<TermiiResponseModel>(respOTP.Response);
-                    }
+                    var respOTP = await StartVerificationAsync(user.ContactNumber, forgotPassword.otpVia, user.EmailAddress, "Pasword URL");
                     if (respOTP.IsValid)
                     {
                         otpsend = true;
+                        var status = ForgotPasswordRequestStatus.InProcess;
+                        token = await GeneratePasswordToken((int)user.UserId, ((int)status));
+                        string log = _unitOfWork.User.SavePasswordToken(token);
+
                     }
-                    var userID = _commonMethods.EncryptStringToBytes(userDetails.UserId.ToString(), keybytes, iv);
-                    if (forgotPassword.otpVia != "email")
-                    { response.Data = new { userId = userID, otpSent = otpsend, responseData = responseData }; }
-                    else
-                    { response.Data = new { userId = userID, otpSent = otpsend }; }
+                    if (forgotPassword.otpVia == "email")
+                    { response.Data = new { userId = user.UserId, otpSent = otpsend, passwordToken = token }; }
                     response.Message = IEHMessages.Success;
                     response.Code = ((int)StatusCode.StatusCode200).ToString();
                     return response;
-                    //  var emailHtml = "WelCome to EHealth ,Please use this Activation code for first login. Your Activation code is " + userDetailsModel.ActivationCode;
-                    //  _emailSender.sendEmail(userDetailsModel.EmailAddress, "Activation Email", emailHtml);
                 }
                 else
                 {
@@ -1180,6 +908,28 @@
             }
         }
 
+        public async Task<ResponseVM> forgotPasswordExpired(PasswordToken PasswordToken)
+        {
+            ResponseVM response = new ResponseVM();
+            try
+            {
+               // var status = ForgotPasswordRequestStatus.InProcess;
+                string log =  _unitOfWork.User.PasswordTokenExpired(PasswordToken);
+
+                response.Data = null;
+                response.Message = IEHMessages.Success;
+                response.Code = ((int)StatusCode.StatusCode200).ToString();
+                return response;
+
+            }
+            catch (Exception e)
+            {
+                response.Data = null;
+                response.Message = IEHMessages.UserNotFound;
+                response.Code = ((int)StatusCode.StatusCode500).ToString();
+                return response;
+            }
+        }
         public async Task<VerificationResult> CheckVerificationAsync(string phoneNumber, string code, string email, string OtpVia, string? pinId)
         {
             try
@@ -1236,6 +986,26 @@
 
             return decrypted;
 
+        }
+
+        public async Task<PasswordToken> GeneratePasswordToken(int UserID, int status)
+        {
+            PasswordToken res = new PasswordToken();
+            var allChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            var resultToken = new string(
+               Enumerable.Repeat(allChar, 20)
+               .Select(token => token[random.Next(token.Length)]).ToArray());
+
+            string authToken = resultToken.ToString();
+            res.ForgotPasswordRequestToken = authToken;
+            res.ForgotPasswordRequestExpiration = DateTime.UtcNow.AddDays(1);
+            res.UserID = 2;
+            res.ForgotPasswordRequestStatus = status;
+            res.ForgotPasswordRequestedOn = DateTime.UtcNow;
+            res.IsBlocked = false;
+
+            return res;
         }
         private static string DecryptStringFromBytes(byte[] cipherText, byte[] key, byte[] iv)
         {

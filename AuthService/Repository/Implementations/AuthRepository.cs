@@ -173,7 +173,7 @@
                 Direction = ParameterDirection.Output
             };
             SqlParameter[] param = {
-                new SqlParameter("@OldPassword", password.OldPassword), 
+                new SqlParameter("@OldPassword", password.OldPassword),
                 new SqlParameter("@NewPassword",password.NewPassword),
                 new SqlParameter("@UserId", claims.UserId),
                 outParam
@@ -514,6 +514,69 @@
             try
             {
                 SqlHelper.ExecuteProcedureReturnString(Constants.DbConn, SpConstants.addLoginLogs, param);
+                return (string)outParam.Value;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public string SavePasswordToken(Utility.PasswordToken model)
+        {          
+            var outParam = new SqlParameter("@ReturnCode", SqlDbType.NVarChar, 20)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            SqlParameter[] param = {
+                new SqlParameter("@ForgotPasswordRequestToken", model.ForgotPasswordRequestToken),
+                new SqlParameter("@ForgotPasswordRequestExpiration", model.ForgotPasswordRequestExpiration),
+                new SqlParameter("@ForgotPasswordRequestStatus", model.ForgotPasswordRequestStatus),
+                new SqlParameter("@ForgotPasswordRequestedOn", model.ForgotPasswordRequestedOn),
+                new SqlParameter("@IsBlocked", model.IsBlocked),
+                new SqlParameter("@UserID", model.UserID),
+                outParam
+            };
+            var connection = _IEHDbContext.GetDbConnection();
+            try
+            {
+                SqlHelper.ExecuteProcedureReturnString(Constants.DbConn, SpConstants.addPasswordToken, param);
+                return (string)outParam.Value;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public string PasswordTokenExpired(Utility.PasswordToken model)
+        {
+            var outParam = new SqlParameter("@ReturnCode", SqlDbType.NVarChar, 20)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            SqlParameter[] param = {
+                 new SqlParameter("@ForgotPasswordRequestGuid", model.ForgotPasswordRequestGuid),
+                new SqlParameter("@ForgotPasswordRequestToken", model.ForgotPasswordRequestToken),
+                new SqlParameter("@UserID", model.UserID),
+                outParam
+            };
+            var connection = _IEHDbContext.GetDbConnection();
+            try
+            {
+                SqlHelper.ExecuteProcedureReturnString(Constants.DbConn, SpConstants.PasswordTokenExpired, param);
                 return (string)outParam.Value;
             }
             catch (Exception ex)

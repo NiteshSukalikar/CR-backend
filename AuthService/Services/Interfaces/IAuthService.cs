@@ -17,19 +17,16 @@
         Task<UserDetails> GetUserDetailsByEmail(string email);
         Task<UserDetails> GetUserDetailsById(string userId);
         Task<ResponseVM> Login(LoginModel loginVM);
-        Task<ResponseVM> ActivateUser(ActivationModel activationModel);
         Task<ResponseVM> LoginOTPVerification(OTPModel model);
-        Task<ResponseVM> GetRolePermissiononRefresh(int Roleid);
 
         Task<ResponseVM> forgotPassword(ForgotPassword forgotPassword);
+        Task<ResponseVM> forgotPasswordExpired(ForgotPassword forgotPassword);
         Task<ResponseVM> verfyOtpForgotPassword(OTPModel otp);
 
         Task<ResponseVM> resetPasswordForgot(ResetPassword resetPassword);
         Task<ResponseVM> ChangePassword(ChangePassword password, Shared.Model.TokenClaimsModal claims);
         
         Task<ResponseVM> updateDeviceToken(bool isMobile, int userId);
-
-
 
         string sendOTPToUser(UserModel user);
 
@@ -39,9 +36,8 @@
 
         string GenerateTokenString(UserDataModel tokenModel);
         Task<JsonModel> RenewTokens(UserDataModel userData);
-        Task<JsonModel> IdentityLogin(UserDetails logiModel);
 
-        Task<VerificationResult> StartVerificationAsync(string phoneNumber, string channel,string email);
+        Task<VerificationResult> StartVerificationAsync(string phoneNumber, string channel,string email, string? forgotPasswordUrl);
         Task<VerificationResult> CheckVerificationAsync(string phoneNumber, string code,string email,string otpVia, string? pinId);
     }
 }
