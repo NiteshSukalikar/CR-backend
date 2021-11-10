@@ -33,6 +33,7 @@
     using AuthService.Model;
     using AuthService.Common.ResponseVM;
     using AuthService.Utility;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Defines the <see cref="AuthService" />
@@ -53,6 +54,7 @@
         /// Defines the _unitOfWork
         /// </summary>
         private IUnitOfWork _unitOfWork;
+        private readonly ILogger<AuthServices> _logger;
 
         /// <summary>
         /// Defines the _configuration
@@ -82,9 +84,10 @@
         /// <param name="unitOfWork">The unitOfWork<see cref="IUnitOfWork"/></param>
         /// <param name="client">The unitOfWork<see cref="HttpClient"/></param>
         /// <param name="Configuration">The Configuration<see cref="IConfiguration"/></param>
-        public AuthServices(IUnitOfWork unitOfWork, HttpClient client, IConfiguration Configuration, IEmailService emailService)
+        public AuthServices(IUnitOfWork unitOfWork, HttpClient client, IConfiguration Configuration, IEmailService emailService, ILogger<AuthServices> logger)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger;
             _httpClient = client;
             _configuration = Configuration;
             _commonMethods = new CommonMethods();
@@ -173,7 +176,7 @@
                     loginLogs.OrganizationID = Convert.ToInt32(user.OrganizationId);
                     loginLogs.LoginAttempt = "FAILED";
                     var log = _unitOfWork.User.loginLog(loginLogs);
-
+                    _logger.LogInformation("Test");
                     responseVM.Code = ((int)StatusCode.StatusCode204).ToString();
                     responseVM.Data = null;
                     responseVM.Message = IEHMessages.EmailorPasswordWrong;
@@ -198,14 +201,14 @@
 
                         if (loginVM.otpVia != "email")
                         { responseVM.Data = new { userId = user.UserId, otpSent = _otpSent, activationRequired = ActivationRequired, responseData = responseData }; }
-
+                        _logger.LogInformation("Test");
                         responseVM.Code = ((int)StatusCode.StatusCode200).ToString();
                         responseVM.Message = IEHMessages.OperationSuccessful;
                     }
                     else
                     {
                         _otpSent = false;
-
+                        _logger.LogInformation("Test");
                         responseVM.Code = ((int)StatusCode.StatusCode200).ToString();
                         responseVM.Data = new { userId = user.UserId, otpSent = _otpSent, activationRequired = ActivationRequired };
                         responseVM.Message = IEHMessages.OperationSuccessful;
@@ -215,6 +218,7 @@
             }
             catch (Exception e)
             {
+                _logger.LogInformation("Test");
                 responseVM.Code = ((int)StatusCode.StatusCode203).ToString(); ;
                 responseVM.Message = IEHMessages.InternalServerError;
                 return responseVM;
@@ -483,13 +487,13 @@
                             claims = user
                         };
 
-                        //if (responseJson != null)
-                        //{
-                        //    SaveLogUserSystem saveLogUserSystem = new SaveLogUserSystem();
-                        //    saveLogUserSystem.SystemIPAddress = model.ipAddr;
-                        //    saveLogUserSystem.OrganizationsToken = responseJson.access_token;
-                        //    var res =  _unitOfWork.User.SaveLogUserSystem(saveLogUserSystem);
-                        //}
+                        if (responseJson != null)
+                        {
+                            SaveLogUserSystem saveLogUserSystem = new SaveLogUserSystem();
+                            saveLogUserSystem.SystemIPAddress = model.ipAddr;
+                            saveLogUserSystem.OrganizationsToken = responseJson.access_token;
+                            var res = _unitOfWork.User.SaveLogUserSystem(saveLogUserSystem);
+                        }
 
                         //if (obj.StatusCode.ToString() == ((int)StatusCode.StatusCode200).ToString())
                         //{

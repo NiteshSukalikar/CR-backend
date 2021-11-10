@@ -498,7 +498,7 @@
 
         public string SaveLogUserSystem(SaveLogUserSystem model)
         {
-            var LogUserCreatedOn = DateTime.Now.ToString("MM/dd/yyyy");
+            var LogUserCreatedOn = DateTime.UtcNow;
             var outParam = new SqlParameter("@ReturnCode", SqlDbType.NVarChar, 20)
             {
                 Direction = ParameterDirection.Output
@@ -513,7 +513,7 @@
             var connection = _IEHDbContext.GetDbConnection();
             try
             {
-                SqlHelper.ExecuteProcedureReturnString(Constants.DbConn, SpConstants.addLoginLogs, param);
+                SqlHelper.ExecuteProcedureReturnString(Constants.DbConn, SpConstants.SaveLogUserSystem, param);
                 return (string)outParam.Value;
             }
             catch (Exception ex)

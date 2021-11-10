@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace IEH_Auth.Controllers
 {
@@ -27,6 +28,7 @@ namespace IEH_Auth.Controllers
         /// Defines the _authService
         /// </summary>
         private readonly IAuthService _authService;
+        private readonly ILogger<AuthController> _logger;
         private readonly CommonMethods _commonMethods;
         private IHttpContextAccessor _accessor;
 
@@ -39,9 +41,10 @@ namespace IEH_Auth.Controllers
         /// Initializes a new instance of the <see cref="AuthController"/> class.
         /// </summary>
         /// <param name="authService">The authService<see cref="IAuthService"/></param>
-        public AuthController(IAuthService authService, IOptions<ApplicationSettings> application, IHttpContextAccessor accessor)
+        public AuthController(IAuthService authService, IOptions<ApplicationSettings> application, IHttpContextAccessor accessor, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _logger = logger;
             applicationsettings = application;
             _commonMethods = new CommonMethods();
             _accessor = accessor;
@@ -104,9 +107,9 @@ namespace IEH_Auth.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("forgotPasswordExpired")]
-        public async Task<IActionResult> forgotPasswordExpired([FromBody] ForgotPassword forgotPassword)
+        public async Task<IActionResult> forgotPasswordExpired([FromBody] PasswordToken passwordToken)
         {
-            ResponseVM result = await _authService.forgotPasswordExpired(forgotPassword);
+            ResponseVM result = await _authService.forgotPasswordExpired(passwordToken);
             return Ok(result);
         }
 

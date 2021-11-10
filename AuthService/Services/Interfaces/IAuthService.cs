@@ -20,7 +20,7 @@
         Task<ResponseVM> LoginOTPVerification(OTPModel model);
 
         Task<ResponseVM> forgotPassword(ForgotPassword forgotPassword);
-        Task<ResponseVM> forgotPasswordExpired(ForgotPassword forgotPassword);
+        Task<ResponseVM> forgotPasswordExpired(PasswordToken passwordToken);
         Task<ResponseVM> verfyOtpForgotPassword(OTPModel otp);
 
         Task<ResponseVM> resetPasswordForgot(ResetPassword resetPassword);
