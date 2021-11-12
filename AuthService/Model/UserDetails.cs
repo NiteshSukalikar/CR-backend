@@ -20,7 +20,7 @@
         public DateTime? Dob{ get; set; }
         public string DobEncrypted { get; set; }
         public bool Status { get; set; }
-        public string Password { get; set; }
+        public string UserPassword { get; set; }
         public string Mrn { get; set; }
         public string ContactNumber { get; set; }
         public byte[]? _contactNumber { get; set; }

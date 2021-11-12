@@ -21,6 +21,7 @@ using Shared.Model;
 using UserService.Common.StaticConstants;
 using Shared.Helper;
 using UserService.Infrastructure.DataAccess;
+using UserService.Model;
 
 namespace UserService.Repository.Implementations
 {
@@ -40,6 +41,72 @@ namespace UserService.Repository.Implementations
         {
             _IEHDbContext = IEHDbContext;
             _commonMethods = new CommonMethods();
+        }
+
+        public async Task<OrganizationModel> GetOrganization(int id)
+        {
+            try
+            {
+                SqlParameter[] param = {
+                    new SqlParameter("@Id",id)
+                };
+                var connection = _IEHDbContext.GetDbConnection();
+                OrganizationModel result = new OrganizationModel();
+                try
+                {
+                    if (connection.State == ConnectionState.Closed) { connection.Open(); }
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        _IEHDbContext.AddParametersToDbCommand(SpConstants.GetOrganization, param, cmd);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            result = _IEHDbContext.DataReaderMapToList<OrganizationModel>(reader).FirstOrDefault();
+                            reader.NextResult();
+                        }
+                    }
+                    return result;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<OrganizationDetailsModel> GetOrganizationList()
+        {
+            try
+            {
+                SqlParameter[] param = { };
+                var connection = _IEHDbContext.GetDbConnection();
+                OrganizationDetailsModel result = new OrganizationDetailsModel();
+                try
+                {
+                    if (connection.State == ConnectionState.Closed) { connection.Open(); }
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        _IEHDbContext.AddParametersToDbCommand(SpConstants.GetOrganizationList, param, cmd);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            result.organizations = _IEHDbContext.DataReaderMapToList<OrganizationModel>(reader).ToList();
+                            reader.NextResult();
+                        }
+                    }
+                    return result;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task<PatientDetailsMobVM> GetPatientByMob(string phone)
@@ -76,7 +143,106 @@ namespace UserService.Repository.Implementations
             }
         }
 
+        public async Task<OrganizationModel> SaveOrganization(UserDetailsModel organizationModel)
+        {
+            try
+            {
+                var outParam = new SqlParameter("@ReturnCode", SqlDbType.NVarChar, 20)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                SqlParameter[] param = {
+                    new SqlParameter("@OrganizationsName",organizationModel.OrganizationsName),
+                    new SqlParameter("@BusinessName",organizationModel.BusinessName),
+                    new SqlParameter("@SubDomainName",organizationModel.SubDomainName),
+                    new SqlParameter("@LogoName",organizationModel.LogoName),
+                    new SqlParameter("@FaviconName",organizationModel.FaviconName),
+                    new SqlParameter("@UserID",organizationModel.UserID),
+                    new SqlParameter("@Address",organizationModel.Address),
+                    new SqlParameter("@EmailAddress",organizationModel.EmailAddress),
+                    new SqlParameter("@PrimaryContactNumber",organizationModel.PrimaryContactNumber),
+                    new SqlParameter("@SecondaryContactNumber",organizationModel.SecondaryContactNumber),
+                    new SqlParameter("@StateID",organizationModel.StateID),
+                    new SqlParameter("@CountryID",organizationModel.CountryID),
+                    new SqlParameter("@OrganizationTypesId",organizationModel.OrganizationTypesId),
+                    new SqlParameter("@IsActive",organizationModel.IsActive),
+                    new SqlParameter("@IsDeleted",organizationModel.IsDeleted),
+                    outParam
+                };
+                var connection = _IEHDbContext.GetDbConnection();
+                OrganizationModel result = new OrganizationModel();
+                try
+                {
+                    if (connection.State == ConnectionState.Closed) { connection.Open(); }
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        _IEHDbContext.AddParametersToDbCommand(SpConstants.SaveOrganization, param, cmd);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            result = _IEHDbContext.DataReaderMapToList<OrganizationModel>(reader).FirstOrDefault();
+                            reader.NextResult();
+                        }
+                    }
+                    return result;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
+        public async Task<OrganizationModel> UpdateOrganization(OrganizationModel organizationModel)
+        {
+            try
+            {
+                SqlParameter[] param = {
+                    new SqlParameter("@OrganizationsName",organizationModel.OrganizationsName),
+                    new SqlParameter("@BusinessName",organizationModel.BusinessName),
+                    new SqlParameter("@SubDomainName",organizationModel.SubDomainName),
+                    new SqlParameter("@LogoName",organizationModel.LogoName),
+                    new SqlParameter("@FaviconName",organizationModel.FaviconName),
+                    new SqlParameter("@UserID",organizationModel.UserID),
+                    new SqlParameter("@Address",organizationModel.Address),
+                    new SqlParameter("@EmailAddress",organizationModel.EmailAddress),
+                    new SqlParameter("@PrimaryContactNumber",organizationModel.PrimaryContactNumber),
+                    new SqlParameter("@SecondaryContactNumber",organizationModel.SecondaryContactNumber),
+                    new SqlParameter("@StateID",organizationModel.StateID),
+                    new SqlParameter("@CountryID",organizationModel.CountryID),
+                    new SqlParameter("@OrganizationTypesId",organizationModel.OrganizationTypesId),
+                    new SqlParameter("@IsActive",organizationModel.IsActive),
+                    new SqlParameter("@IsDeleted",organizationModel.IsDeleted)
+                };
+                var connection = _IEHDbContext.GetDbConnection();
+                OrganizationModel result = new OrganizationModel();
+                try
+                {
+                    if (connection.State == ConnectionState.Closed) { connection.Open(); }
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        _IEHDbContext.AddParametersToDbCommand(SpConstants.UpdateOrganization, param, cmd);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            result = _IEHDbContext.DataReaderMapToList<OrganizationModel>(reader).FirstOrDefault();
+                            reader.NextResult();
+                        }
+                    }
+                    return result;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
 

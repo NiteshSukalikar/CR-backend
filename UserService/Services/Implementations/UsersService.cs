@@ -69,6 +69,135 @@ namespace UserService.Services.Implementations
             }
         }
 
+        public async Task<ResponseModel> GetOrganizationList()
+        {
+            var response = new ResponseModel();
+            try
+            {
+                OrganizationDetailsModel result = await _unitOfWork.UserDetailsModel.GetOrganizationList();
+                if (result != null)
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode200).ToString();
+                    response.Data = result;
+                    response.Message = IEHMessages.OperationSuccessful;
+                }
+                else
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                    response.Data = null;
+                    response.Message = IEHMessages.UserNotFound;
+                }
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                response.Data = null;
+                response.Message = IEHMessages.InternalServerError;
+                return response;
+            }
+        }
+
+        public async Task<ResponseModel> GetOrganization(int id)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                OrganizationModel result = await _unitOfWork.UserDetailsModel.GetOrganization(id);
+                if (result != null)
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode200).ToString();
+                    response.Data = result;
+                    response.Message = IEHMessages.OperationSuccessful;
+                }
+                else
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                    response.Data = null;
+                    response.Message = IEHMessages.UserNotFound;
+                }
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                response.Data = null;
+                response.Message = IEHMessages.InternalServerError;
+                return response;
+            }
+        }
+
+        public async Task<ResponseModel> SaveOrganization(UserDetailsModel userDetailsModel)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                try
+                {
+
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+
+                OrganizationModel result = await _unitOfWork.UserDetailsModel.SaveOrganization(userDetailsModel);
+                if (result != null)
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode200).ToString();
+                    response.Data = result;
+                    response.Message = IEHMessages.OperationSuccessful;
+                }
+                else
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                    response.Data = null;
+                    response.Message = IEHMessages.UserNotFound;
+                }
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                response.Data = null;
+                response.Message = IEHMessages.InternalServerError;
+                return response;
+            }
+        }
+
+        public async Task<ResponseModel> UpdateOrganization(OrganizationModel organizationModel)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                OrganizationModel result = await _unitOfWork.UserDetailsModel.UpdateOrganization(organizationModel);
+                if (result != null)
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode200).ToString();
+                    response.Data = result;
+                    response.Message = IEHMessages.OperationSuccessful;
+                }
+                else
+                {
+                    response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                    response.Data = null;
+                    response.Message = IEHMessages.UserNotFound;
+                }
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                response.Data = null;
+                response.Message = IEHMessages.InternalServerError;
+                return response;
+            }
+        }
     }
 }
 

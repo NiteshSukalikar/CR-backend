@@ -164,7 +164,7 @@
                     responseVM.Data = null;
                     responseVM.Message = IEHMessages.UserNotFound;
                 }
-                else if (user.Password != loginVM.Password)
+                else if (user.UserPassword != loginVM.Password)
                 {
                     LoginLogs loginLogs = new LoginLogs();
                     loginLogs.Action = "LOGIN";

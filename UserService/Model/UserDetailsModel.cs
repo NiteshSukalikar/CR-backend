@@ -9,98 +9,51 @@
 
     public class UserDetailsModel
     {
-        public long Id { get; set; }
-        public int? OrgId { get; set; }
+        //Admin
+        public long UserID { get; set; }
+        public string MacAddress { get; set; }
+        public string TransactionCode { get; set; }
+        public string UserName { get; set; }
+        public string UserPassword { get; set; }
 
-        public int UserType { get; set; }
-        public int? ProviderType { get; set; }
-        public int? RoleId { get; set; }
-        public long? UserId { get; set; }
-
-        public string PhotoPath { get; set; }
-        public int? TitleId { get; set; }
+        //Admin Profile
+        public long UserProfileID { get; set; }
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string MaidenName { get; set; }
         public string OtherName { get; set; }
-
-        public int? ResidenceCountryId { get; set; }
-        public int? ResidenceStateId { get; set; }
-        public int? ResidenceCityId { get; set; }
-        public string ResidenceAddress { get; set; }
-
-        public string dob { get; set; }
-        public Int16? GenderId { get; set; }
-        public string License { get; set; }
-
-        [Required]
-        [DataMember(Name = "Telephone")]
-        public string Telephone { get; set; }
-
-        [Required]
-        [DataMember(Name = "EmailAddress")]
+        public int GenderId { get; set; }
+        public int? MaritalStatusId { get; set; }
+        public int CreatedByLoginID { get; set; }
+        public string Age { get; set; }
+        public string DOB { get; set; }
         public string EmailAddress { get; set; }
+        public string? NativeSpokenLanguage { get; set; }
+        public string PrimaryContactNumber { get; set; }
+        public string SecondaryContactNumber { get; set; }
+      
 
-        public string Password { get; set; }
+        //Organization
 
-        public string PostalCode { get; set; }
-        public string NativeSpokenLanguage { get; set; }
-        public string OtherSpokenLanguage { get; set; }
-        public string ReadWriteLanguage { get; set; }
-
-        public string EducationLevel { get; set; }
-        public string Profession { get; set; }
-        public string EmploymentStatus { get; set; }
-
-        public bool IsActive { get; set; }
-        public string ResponseResult { get; set; }
-
-        public long? CreatedBy { get; set; }
-        public DateTime? CreatedOn { get; set; }
-        public long? ModifiedBy { get; set; }
-        public DateTime? ModifiedOn { get; set; }
-        public string MRN { get; set; }
-
-
-        public OrganizationVM organization { get; set; }
-        public int? OrganizationId { get; set; }
-        public string ActivationCode { get; set; }
-        public bool IsActivated { get; set; }
-
-        public string Gender { get; set; }
-
-        public string TitleName { get; set; }
-        
-        public string PhotoBase64 { get; set; }
-        public string InvoiceNo { get; set; }
-        public decimal? Amount { get; set; }
-        public long? TotalRecords { get; set; }
-        public int? OrgIdForConsent { get; set; }
-
-        public string MaritalStatus { get; set; }
-        public string CountryName { get; set; }
-        public string CityName { get; set; }
-        public List<DelegationVM> delegationList { get; set; }
-        public List<TagPatientDetails> tagPatientDetails { get; set; }
+        public long OrganizationsID { get; set; }
+        public string OrganizationsName { get; set; }
+        public string BusinessName { get; set; }
+        public string SubDomainName { get; set; }
+        public string LogoName { get; set; }
+        public string FaviconName { get; set; }
+        public string Address { get; set; }
+        public string EmailAddressOrg { get; set; }
+        public string PrimaryContactNumberOrg { get; set; }
+        public string SecondaryContactNumberOrg { get; set; }
+        public int StateID { get; set; }
+        public int CountryID { get; set; }
+        public long OrganizationTypesId { get; set; }
+        public bool? IsActive { get; set; }
+        public bool? IsDeleted { get; set; }
+        public int? CreatedBy { get; set; }
+        public int? ModifiedBy { get; set; }
     }
 
-    public class DoctorVM
-    {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public int RoleId { get; set; }
-        public long UserId { get; set; }
-    }
-
-    public class DelegationVM
-    {
-        public long Id { get; set; }
-        public long UserId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string EmailAddress { get; set; }
-    }
 
 }

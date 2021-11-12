@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UserService.ViewModel;
 
 namespace UserService.Model
 {
-    public class PatientProfileDetails
+    public class OrganizationDetailsModel
     {
-        public List<PatientDetails> patientDetails { get; set; }
-
+        public List<OrganizationModel> organizations { get; set; }
     }
 }
