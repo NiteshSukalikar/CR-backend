@@ -8,12 +8,11 @@ namespace UserService.Model
     public class OrganizationModel
     {
         public long OrganizationsID { get; set; }
-        public string OrganizationsName { get; set; }
+        public string OrganizationName { get; set; }
         public string BusinessName { get; set; }
         public string SubDomainName { get; set; }
         public string LogoName { get; set; }
         public string FaviconName { get; set; }
-        public long UserID { get; set; }
         public string Address { get; set; }
         public string EmailAddress { get; set; }
         public string PrimaryContactNumber { get; set; }

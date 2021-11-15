@@ -11,5 +11,6 @@
         public const string GetOrganization = "USP_GetOrganization";
         public const string SaveOrganization = "USP_AddOrganizations";
         public const string UpdateOrganization = "USP_UpdateOrganizations";
+        public const string SaveVendor = "USP_AddVendor";
     }
 }

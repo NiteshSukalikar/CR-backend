@@ -13,8 +13,8 @@ namespace UserService.Services.Interfaces
         Task<ResponseModel> GetPatientByMob(string phone);
         Task<ResponseModel> GetOrganizationList();
         Task<ResponseModel> GetOrganization(int id);
-        Task<ResponseModel> SaveOrganization(UserDetailsModel userDetailsModel);
-
+        Task<ResponseModel> SaveOrganization(OrganizationModel organizationModel);
         Task<ResponseModel> UpdateOrganization(OrganizationModel organizationModel);
+        Task<ResponseModel> AdminInvite(AdminInviteModel adminInviteModel);
     }
 }

@@ -42,6 +42,7 @@ namespace UserService.Repository.Implementations
             _IEHDbContext = IEHDbContext;
             _commonMethods = new CommonMethods();
         }
+               
 
         public async Task<OrganizationModel> GetOrganization(int id)
         {
@@ -143,7 +144,7 @@ namespace UserService.Repository.Implementations
             }
         }
 
-        public async Task<OrganizationModel> SaveOrganization(UserDetailsModel organizationModel)
+        public async Task<OrganizationModel> SaveOrganization(OrganizationModel organizationModel)
         {
             try
             {
@@ -151,19 +152,18 @@ namespace UserService.Repository.Implementations
                 {
                     Direction = ParameterDirection.Output
                 };
-                SqlParameter[] param = {
-                    new SqlParameter("@OrganizationsName",organizationModel.OrganizationsName),
+                SqlParameter[] param = {                    
+                    new SqlParameter("@StateID",organizationModel.StateID),
+                    new SqlParameter("@CountryID",organizationModel.CountryID),
+                    new SqlParameter("@EmailAddress ",organizationModel.EmailAddress),
+                    new SqlParameter("@PrimaryContactNumber ",organizationModel.PrimaryContactNumber),
+                    new SqlParameter("@SecondaryContactNumber ",organizationModel.SecondaryContactNumber),
+                    new SqlParameter("@OrganizationsName",organizationModel.OrganizationName),
                     new SqlParameter("@BusinessName",organizationModel.BusinessName),
                     new SqlParameter("@SubDomainName",organizationModel.SubDomainName),
                     new SqlParameter("@LogoName",organizationModel.LogoName),
                     new SqlParameter("@FaviconName",organizationModel.FaviconName),
-                    new SqlParameter("@UserID",organizationModel.UserID),
-                    new SqlParameter("@Address",organizationModel.Address),
-                    new SqlParameter("@EmailAddress",organizationModel.EmailAddress),
-                    new SqlParameter("@PrimaryContactNumber",organizationModel.PrimaryContactNumber),
-                    new SqlParameter("@SecondaryContactNumber",organizationModel.SecondaryContactNumber),
-                    new SqlParameter("@StateID",organizationModel.StateID),
-                    new SqlParameter("@CountryID",organizationModel.CountryID),
+                    new SqlParameter("@Address",organizationModel.Address),                 
                     new SqlParameter("@OrganizationTypesId",organizationModel.OrganizationTypesId),
                     new SqlParameter("@IsActive",organizationModel.IsActive),
                     new SqlParameter("@IsDeleted",organizationModel.IsDeleted),
@@ -196,17 +196,61 @@ namespace UserService.Repository.Implementations
             }
         }
 
+        public async Task<AdminInviteModel> SaveVendor(AdminInviteModel adminInviteModel)
+        {
+            try
+            {
+                var outParam = new SqlParameter("@ReturnCode", SqlDbType.NVarChar, 20)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                SqlParameter[] param = {
+                    new SqlParameter("@vendorFirstName",adminInviteModel.vendorFirstName),
+                    new SqlParameter("@vendorMiddleName",adminInviteModel.vendorMiddleName),
+                    new SqlParameter("@vendorLastName",adminInviteModel.vendorLastName),
+                    new SqlParameter("@vendorEmail ",adminInviteModel.vendorEmail),
+                    new SqlParameter("@vendorPrimaryContactNumber ",adminInviteModel.vendorPrimaryContactNumber),
+                    new SqlParameter("@vendorSecondaryContactNumber ",adminInviteModel.vendorSecondaryContactNumber),
+                    new SqlParameter("@subscription",adminInviteModel.subscription),
+                    outParam
+                };
+                var connection = _IEHDbContext.GetDbConnection();
+                AdminInviteModel result = new AdminInviteModel();
+                try
+                {
+                    if (connection.State == ConnectionState.Closed) { connection.Open(); }
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        _IEHDbContext.AddParametersToDbCommand(SpConstants.SaveVendor, param, cmd);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            result = _IEHDbContext.DataReaderMapToList<AdminInviteModel>(reader).FirstOrDefault();
+                            reader.NextResult();
+                        }
+                    }
+                    return result;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<OrganizationModel> UpdateOrganization(OrganizationModel organizationModel)
         {
             try
             {
                 SqlParameter[] param = {
-                    new SqlParameter("@OrganizationsName",organizationModel.OrganizationsName),
+                    new SqlParameter("@OrganizationsName",organizationModel.OrganizationName),
                     new SqlParameter("@BusinessName",organizationModel.BusinessName),
                     new SqlParameter("@SubDomainName",organizationModel.SubDomainName),
                     new SqlParameter("@LogoName",organizationModel.LogoName),
                     new SqlParameter("@FaviconName",organizationModel.FaviconName),
-                    new SqlParameter("@UserID",organizationModel.UserID),
                     new SqlParameter("@Address",organizationModel.Address),
                     new SqlParameter("@EmailAddress",organizationModel.EmailAddress),
                     new SqlParameter("@PrimaryContactNumber",organizationModel.PrimaryContactNumber),

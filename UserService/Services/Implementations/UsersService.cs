@@ -37,7 +37,7 @@ namespace UserService.Services.Implementations
             _unitOfWork = unitOfWork;
             _commonMethods = new CommonMethods();
         }
-              
+
 
         public async Task<ResponseModel> GetPatientByMob(string phone)
         {
@@ -129,34 +129,17 @@ namespace UserService.Services.Implementations
             }
         }
 
-        public async Task<ResponseModel> SaveOrganization(UserDetailsModel userDetailsModel)
+        public async Task<ResponseModel> SaveOrganization(OrganizationModel organizationModel)
         {
             var response = new ResponseModel();
             try
             {
-                try
-                {
 
-                }
-                catch (Exception)
-                {
+                OrganizationModel result = await _unitOfWork.UserDetailsModel.SaveOrganization(organizationModel);
 
-                    throw;
-                }
-
-                OrganizationModel result = await _unitOfWork.UserDetailsModel.SaveOrganization(userDetailsModel);
-                if (result != null)
-                {
-                    response.StatusCode = ((int)StatusCode.StatusCode200).ToString();
-                    response.Data = result;
-                    response.Message = IEHMessages.OperationSuccessful;
-                }
-                else
-                {
-                    response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
-                    response.Data = null;
-                    response.Message = IEHMessages.UserNotFound;
-                }
+                response.StatusCode = ((int)StatusCode.StatusCode200).ToString();
+                response.Data = result;
+                response.Message = IEHMessages.OperationSuccessful;
 
                 return response;
             }
@@ -187,6 +170,28 @@ namespace UserService.Services.Implementations
                     response.Data = null;
                     response.Message = IEHMessages.UserNotFound;
                 }
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                response.StatusCode = ((int)StatusCode.StatusCode205).ToString();
+                response.Data = null;
+                response.Message = IEHMessages.InternalServerError;
+                return response;
+            }
+        }
+
+        public async Task<ResponseModel> AdminInvite(AdminInviteModel adminInviteModel)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                AdminInviteModel result = await _unitOfWork.UserDetailsModel.SaveVendor(adminInviteModel);
+
+                response.StatusCode = ((int)StatusCode.StatusCode200).ToString();
+                response.Data = result;
+                response.Message = IEHMessages.OperationSuccessful;
 
                 return response;
             }

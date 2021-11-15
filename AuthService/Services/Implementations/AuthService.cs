@@ -798,7 +798,7 @@
                 int port = 587;
                 string host = "smtp.zoho.in";
                 string username = "nitesh12345@zohomail.in";
-                string password = "App_store12345";
+                string password = "App_store54321";
                 string mailFrom = "nitesh12345@zohomail.in";
                 string mailTo = email;
                 string mailTitle = "Authentication Code";

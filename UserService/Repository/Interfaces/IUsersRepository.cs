@@ -14,7 +14,9 @@ namespace UserService.Repository.Interfaces
         Task<PatientDetailsMobVM> GetPatientByMob(string phone);
         Task<OrganizationDetailsModel> GetOrganizationList();
         Task<OrganizationModel> GetOrganization(int id);
-        Task<OrganizationModel> SaveOrganization(UserDetailsModel userDetailsModel);
+        Task<OrganizationModel> SaveOrganization(OrganizationModel organizationModel);
         Task<OrganizationModel> UpdateOrganization(OrganizationModel organizationModel);
+        //Task<AdminInviteModel> AdminInvite(AdminInviteModel adminInviteModel);
+        Task<AdminInviteModel> SaveVendor(AdminInviteModel adminInviteModel);
     }
 }

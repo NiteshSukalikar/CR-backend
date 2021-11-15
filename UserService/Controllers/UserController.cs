@@ -79,9 +79,9 @@ namespace UserService.Controllers
 
         [HttpPost]
         [Route("SaveOrganization")]
-        public async Task<IActionResult> SaveOrganization(UserDetailsModel userDetailsModel)
+        public async Task<IActionResult> SaveOrganization(OrganizationModel organizationModel)
         {
-            ResponseModel result = await _usersService.SaveOrganization(userDetailsModel);
+            ResponseModel result = await _usersService.SaveOrganization(organizationModel);
             return Ok(result);
         }
 
@@ -93,6 +93,13 @@ namespace UserService.Controllers
             return Ok(result);
         }
 
+        [HttpPost]
+        [Route("AdminInvite")]
+        public async Task<IActionResult> AdminInvite(AdminInviteModel adminInviteModel)
+        {
+            ResponseModel result = await _usersService.AdminInvite(adminInviteModel);
+            return Ok(result);
+        }
 
     }
 }
